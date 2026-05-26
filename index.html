@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Finance Rabu - Ultimate Precision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-texture: url("https://www.transparenttextures.com/patterns/cubes.png");
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            background-image: var(--bg-texture);
+            color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #f472b6 0%, #fb923c 100%);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border-left: 4px solid #6366f1;
+        }
+
+        .mobile-nav-item.active {
+            color: #818cf8;
+            transform: translateY(-4px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        input, select, textarea {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* PRINT STYLES - KHUSUS UNTUK PDF */
+        @media print {
+            body { background: white !important; color: black !important; background-image: none !important; }
+            .no-print, aside, nav, .btn-ai, header button, #ai-modal { display: none !important; }
+            .glass-card { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; backdrop-filter: none !important; }
+            .tab-content { display: block !important; }
+            #tab-reports { display: block !important; }
+            canvas { max-width: 400px !important; margin: 0 auto; }
+            .text-emerald-400, .text-emerald-500 { color: #059669 !important; }
+            .text-rose-400, .text-rose-500 { color: #dc2626 !important; }
+            .text-indigo-400, .text-indigo-500 { color: #4f46e5 !important; }
+            main { padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+            h1, h2, h3 { color: black !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden flex flex-col">
+
+    <!-- LOGIN & MAIN UI STRUCTURE (Tetap sama seperti sebelumnya) -->
+    <div id="login-page" class="flex items-center justify-center min-h-screen p-4 z-50">
+        <div class="glass-card w-full max-w-md p-6 md:p-10 rounded-[2.5rem] shadow-2xl">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold tracking-tight mb-2">Smart Finance <span class="text-indigo-400">Rabu</span></h1>
+                <p class="text-slate-400 text-sm italic">"Precision Asset Management ✨ AI"</p>
+            </div>
+            <form id="login-form" class="space-y-5">
+                <input type="text" id="username" class="w-full px-5 py-4 rounded-2xl outline-none" placeholder="admin" required>
+                <input type="password" id="password" class="w-full px-5 py-4 rounded-2xl outline-none" placeholder="admin123" required>
+                <button type="submit" class="btn-primary w-full py-4 rounded-2xl font-bold text-lg shadow-lg mt-4 uppercase">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden flex flex-col lg:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="hidden lg:flex w-80 glass-card flex-col p-8 sticky top-0 h-screen no-print">
+            <div class="mb-12">
+                <h2 class="text-2xl font-black tracking-tighter uppercase">SMART FINANCE<br><span class="text-indigo-500 text-3xl">RABU</span></h2>
+            </div>
+            <nav class="flex-1 space-y-3">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex items-center w-full p-4 rounded-2xl transition-all active"><i class="fas fa-chart-line mr-4 w-5"></i> <span class="font-bold">Dashboard</span></button>
+                <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-item flex items-center w-full p-4 rounded-2xl transition-all text-slate-400"><i class="fas fa-plus-circle mr-4 w-5"></i> <span class="font-bold">Transaksi</span></button>
+                <button onclick="switchTab('budgeting')" id="nav-budgeting" class="nav-item flex items-center w-full p-4 rounded-2xl transition-all text-slate-400"><i class="fas fa-bullseye mr-4 w-5"></i> <span class="font-bold">Anggaran</span></button>
+                <button onclick="switchTab('reports')" id="nav-reports" class="nav-item flex items-center w-full p-4 rounded-2xl transition-all text-slate-400"><i class="fas fa-file-invoice-dollar mr-4 w-5"></i> <span class="font-bold">Laporan</span></button>
+            </nav>
+            <button onclick="logout()" class="text-slate-500 hover:text-red-400 p-4 w-full text-xs font-bold uppercase tracking-widest text-left"><i class="fas fa-power-off mr-4"></i> Keluar</button>
+        </aside>
+
+        <!-- Mobile Nav -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-card p-4 flex justify-around items-center no-print">
+            <button onclick="switchTab('dashboard')" id="m-nav-dashboard" class="mobile-nav-item active"><i class="fas fa-chart-line text-xl"></i></button>
+            <button onclick="switchTab('transactions')" id="m-nav-transactions" class="mobile-nav-item text-slate-500"><i class="fas fa-plus-circle text-xl"></i></button>
+            <button onclick="switchTab('budgeting')" id="m-nav-budgeting" class="mobile-nav-item text-slate-500"><i class="fas fa-bullseye text-xl"></i></button>
+            <button onclick="switchTab('reports')" id="m-nav-reports" class="mobile-nav-item text-slate-500"><i class="fas fa-file-invoice-dollar text-xl"></i></button>
+        </nav>
+
+        <main class="flex-1 p-4 md:p-10 pb-32 lg:pb-10 flex flex-col max-w-7xl mx-auto w-full overflow-y-auto">
+            <header class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+                <div id="print-header">
+                    <h1 id="page-title" class="text-2xl md:text-4xl font-black uppercase">Dashboard</h1>
+                    <p class="text-slate-500 text-sm mt-1" id="page-subtitle">Ringkasan keuangan Anda.</p>
+                </div>
+                <div class="no-print">
+                    <button onclick="generateAIInsight()" class="btn-ai px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2"><i class="fas fa-brain"></i> Analisis AI ✨</button>
+                </div>
+            </header>
+
+            <!-- TAB CONTENT (Dashboard & Transactions remains the same logic) -->
+            <section id="tab-dashboard" class="tab-content fade-in space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-[2rem] border-l-8 border-emerald-500">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Pemasukan</p>
+                        <h3 class="text-xl md:text-2xl font-black text-emerald-400" id="dash-income">Rp 0</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-[2rem] border-l-8 border-rose-500">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Pengeluaran</p>
+                        <h3 class="text-xl md:text-2xl font-black text-rose-400" id="dash-expense">Rp 0</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-[2rem] border-l-8 border-indigo-500">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Saldo</p>
+                        <h3 class="text-xl md:text-2xl font-black text-white" id="dash-balance">Rp 0</h3>
+                    </div>
+                </div>
+                <div class="glass-card p-8 rounded-[2.5rem]">
+                    <h3 class="font-black text-lg mb-6 uppercase"><i class="fas fa-history text-indigo-500 mr-3"></i> Aktivitas Terakhir</h3>
+                    <div id="dashboard-recent" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <section id="tab-transactions" class="tab-content fade-in hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-5 no-print">
+                    <div class="glass-card p-8 rounded-[2.5rem]">
+                        <h3 class="font-black text-xl mb-8 uppercase">Input Data</h3>
+                        <form id="transaction-form" class="space-y-4">
+                            <div class="flex p-1.5 bg-slate-900 rounded-2xl">
+                                <button type="button" onclick="setMode('income')" id="btn-type-income" class="flex-1 py-3 rounded-xl font-black text-xs bg-emerald-500 text-white shadow-lg uppercase">Masuk</button>
+                                <button type="button" onclick="setMode('expense')" id="btn-type-expense" class="flex-1 py-3 rounded-xl font-black text-xs text-slate-500 uppercase">Keluar</button>
+                            </div>
+                            <input type="number" id="t-amount" class="w-full p-4 rounded-xl text-xl font-black" placeholder="Rp 0" required>
+                            <select id="t-category" class="w-full p-4 rounded-xl font-bold uppercase text-xs" required></select>
+                            <textarea id="t-note" class="w-full p-4 rounded-xl text-sm h-24 resize-none" placeholder="Catatan..."></textarea>
+                            <button type="submit" class="btn-primary w-full py-5 rounded-2xl font-black text-sm uppercase mt-4">Simpan</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-7">
+                    <div class="glass-card rounded-[2.5rem] overflow-hidden flex flex-col h-full min-h-[500px]">
+                        <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                            <h3 class="font-black uppercase tracking-widest text-sm">Riwayat Lengkap</h3>
+                        </div>
+                        <div id="full-history" class="p-6 space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-budgeting" class="tab-content fade-in hidden space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card p-8 rounded-[2.5rem] no-print">
+                        <h3 class="font-black text-xl mb-6 uppercase">Set Limit</h3>
+                        <div id="budget-setup-list" class="space-y-6"></div>
+                    </div>
+                    <div class="glass-card p-8 rounded-[2.5rem]">
+                        <h3 class="font-black text-xl mb-6 uppercase">Status Anggaran</h3>
+                        <div id="budget-status-list" class="space-y-8"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB REPORTS DENGAN TOMBOL PDF -->
+            <section id="tab-reports" class="tab-content fade-in hidden space-y-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+                    <p class="text-slate-400 text-sm">Visualisasi data pengeluaran dan pemasukan bulanan.</p>
+                    <button onclick="printToPDF()" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all">
+                        <i class="fas fa-file-pdf"></i> Cetak PDF Laporan
+                    </button>
+                </div>
+                
+                <div id="print-area" class="space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-[2.5rem] min-h-[400px]">
+                            <h3 class="font-black text-lg mb-8 uppercase text-center">Proporsi Pengeluaran</h3>
+                            <div class="h-72"><canvas id="pieChart"></canvas></div>
+                        </div>
+                        <div class="glass-card p-8 rounded-[2.5rem] min-h-[400px]">
+                            <h3 class="font-black text-lg mb-8 uppercase text-center">Analisis Aliran Kas</h3>
+                            <div class="h-72"><canvas id="barChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Data Cetak (Hanya Muncul di Print/Laporan) -->
+                    <div class="glass-card p-8 rounded-[2.5rem]">
+                        <h3 class="font-black text-xl mb-6 uppercase tracking-tighter">Rekapitulasi Transaksi</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="border-b border-white/10">
+                                    <tr>
+                                        <th class="py-4 font-black uppercase text-[10px] text-slate-500">Tanggal</th>
+                                        <th class="py-4 font-black uppercase text-[10px] text-slate-500">Kategori</th>
+                                        <th class="py-4 font-black uppercase text-[10px] text-slate-500">Tipe</th>
+                                        <th class="py-4 font-black uppercase text-[10px] text-slate-500 text-right">Jumlah</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-table-body" class="divide-y divide-white/5">
+                                    <!-- Diisi via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- AI MODAL -->
+    <div id="ai-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-2xl rounded-[2.5rem] overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="p-8 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-black uppercase tracking-widest text-indigo-400">✨ Analisis Gemini</h3>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="ai-content" class="p-8 overflow-y-auto text-slate-300 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "";
+        let state = {
+            transactions: [],
+            budget: { "Makan": 0, "Transport": 0, "Cicilan": 0, "Tagihan": 0, "Lainnya": 0 },
+            mode: 'income'
+        };
+
+        const categories = {
+            income: ["Gaji", "Bonus", "Investasi", "Lainnya"],
+            expense: ["Makan", "Transport", "Cicilan", "Tagihan", "Hiburan", "Lainnya"]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // Nav styling
+            document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el => el.classList.remove('active', 'text-white'));
+            document.getElementById(`nav-${tabId}`)?.classList.add('active', 'text-white');
+            document.getElementById(`m-nav-${tabId}`)?.classList.add('active');
+
+            document.getElementById('page-title').innerText = tabId.toUpperCase();
+            if(tabId === 'reports') {
+                renderCharts();
+                updateReportTable();
+            }
+            if(tabId === 'budgeting') renderBudgetUI();
+        }
+
+        function setMode(m) {
+            state.mode = m;
+            const btnIn = document.getElementById('btn-type-income');
+            const btnEx = document.getElementById('btn-type-expense');
+            const select = document.getElementById('t-category');
+            if(m === 'income') {
+                btnIn.className = "flex-1 py-3 rounded-xl font-black text-xs bg-emerald-500 text-white shadow-lg uppercase";
+                btnEx.className = "flex-1 py-3 rounded-xl font-black text-xs text-slate-500 uppercase";
+                select.innerHTML = categories.income.map(c => `<option value="${c}">${c}</option>`).join('');
+            } else {
+                btnEx.className = "flex-1 py-3 rounded-xl font-black text-xs bg-rose-500 text-white shadow-lg uppercase";
+                btnIn.className = "flex-1 py-3 rounded-xl font-black text-xs text-slate-500 uppercase";
+                select.innerHTML = categories.expense.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+        }
+
+        function formatIDR(num) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        }
+
+        document.getElementById('transaction-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('t-amount').value);
+            const category = document.getElementById('t-category').value;
+            const tx = {
+                id: Date.now(),
+                type: state.mode,
+                amount,
+                category,
+                note: document.getElementById('t-note').value,
+                date: new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })
+            };
+            state.transactions.unshift(tx);
+            document.getElementById('t-amount').value = '';
+            document.getElementById('t-note').value = '';
+            updateDashboard();
+            renderHistory();
+        });
+
+        function updateDashboard() {
+            const income = state.transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const expense = state.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+            document.getElementById('dash-income').innerText = formatIDR(income);
+            document.getElementById('dash-expense').innerText = formatIDR(expense);
+            document.getElementById('dash-balance').innerText = formatIDR(income - expense);
+            document.getElementById('dashboard-recent').innerHTML = state.transactions.slice(0, 5).map(t => `
+                <div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center border border-white/5">
+                    <div>
+                        <p class="font-black text-xs uppercase">${t.category}</p>
+                        <p class="text-[9px] text-slate-500">${t.date}</p>
+                    </div>
+ 
